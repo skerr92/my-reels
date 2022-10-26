@@ -1,7 +1,7 @@
 """
 LICENSE: GPL-3.0
 
-Name: app.py
+Name: config.py
 
 Desc: MyReels Locally Managed Parts and Project Inventory Server
 
