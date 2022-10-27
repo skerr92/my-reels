@@ -41,7 +41,7 @@ Project leaders have the right and responsibility to remove, edit, or reject mes
 
 ### Moderation ###
  
- Instances of behaviors that violate the Adafruit Community Code of Conduct may be reported by any member of the community. Community members are encouraged to report these situations, including situations they witness involving other community members.
+ Instances of behaviors that violate the MyReels Community Code of Conduct may be reported by any member of the community. Community members are encouraged to report these situations, including situations they witness involving other community members.
 
 You may report in the following ways:
 
@@ -51,7 +51,7 @@ Email reports will be kept confidential
 
 These are the steps for upholding our community’s standards of conduct.
 
-Any member of the community may report any situation that violates the Adafruit Community Code of Conduct. All reports will be reviewed and investigated.
+Any member of the community may report any situation that violates the MyReels Community Code of Conduct. All reports will be reviewed and investigated.
 If the behavior is an egregious violation, the community member who committed the violation may be banned immediately, without warning.
 Otherwise, moderators will first respond to such behavior with a warning.
 Moderators follow a soft "three strikes" policy - the community member may be given another chance, if they are receptive to the warning and change their behavior.
