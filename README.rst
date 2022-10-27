@@ -8,12 +8,12 @@ MyReels can also be used to keep track of PCB quantities and revisions.
 
 **Installation**
 -----------------
-Please refer to the [Installation and Usage Guide](https://github.com/skerr92/my-reels/blob/main/INSTALLATION.md) for steps for setting up, using, and troubleshooting MyReels.
+Please refer to the :ref: `Installation and Usage Guide <https://github.com/skerr92/my-reels/blob/main/INSTALLATION.md>` for steps for setting up, using, and troubleshooting MyReels.
 
 **Contributing**
 ----------------
-Please see the [Contribution Guide](https://github.com/skerr92/my-reels/blob/main/CONTRIBUTING.md) for information about contributing to this project. If you have any questions, please opan an issue or email hello@oakdev.tech
+Please see the :ref: `Contribution Guide <https://github.com/skerr92/my-reels/blob/main/CONTRIBUTING.md>` for information about contributing to this project. If you have any questions, please opan an issue or email hello@oakdev.tech
 
 **Code of Conduct**
 -------------------
-All contributors are expected to follow the [Code of Conduct](https://github.com/skerr92/my-reels/blob/main/CODE_OF_CONDUCT.md) when contributing to this projects.
+All contributors are expected to follow the `Code of Conduct <https://github.com/skerr92/my-reels/blob/main/CODE_OF_CONDUCT.md>` when contributing to this projects.
