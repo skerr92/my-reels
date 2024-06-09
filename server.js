@@ -9,10 +9,16 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const CryptoJS = require('crypto-js');
 
+const txtfs = require('node:fs');
+
 const app = express();
 const port = 3000;
 const secretKey = 'your-secret-key'; // Change this to a secure secret key
 
+let version = "";
+
+version = fs.readFileSync('version.txt', 'utf8');
+console.log("Running MyReels Version: %s",version);
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -20,12 +26,18 @@ app.use(cors());
 const db = new sqlite3.Database('local.db');
 
 db.serialize(() => {
+    db.run(`CREATE TABLE IF NOT EXISTS version (
+        version TEXT PRIMARY KEY
+    )`);
     db.run(`CREATE TABLE IF NOT EXISTS users (
+        version TEXT,
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE,
-        password TEXT
+        password TEXT,
+        FOREIGN KEY(version) REFERENCES version(version)
     )`);
     db.run(`CREATE TABLE IF NOT EXISTS parts (
+        version TEXT,
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
         name TEXT,
@@ -34,16 +46,47 @@ db.serialize(() => {
         description TEXT,
         quantity INTEGER,
         FOREIGN KEY(user_id) REFERENCES users(id)
+        FOREIGN KEY(version) REFERENCES version(version)
     )`);
     db.run(`CREATE TABLE IF NOT EXISTS projects (
+        version TEXT,
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
         name TEXT,
         description TEXT,
         github TEXT,
         FOREIGN KEY(user_id) REFERENCES users(id)
+        FOREIGN KEY(version) REFERENCES version(version)
     )`);
 });
+
+db.get('SELECT * FROM version',[],(err,t_ver) => {
+    if (err || !t_ver) {
+        console.log("no table exists");
+        db.run('INSERT INTO version (version) values(?)',[version], function(err) {
+            if (err) {
+                console.log("failed to set version");
+            }
+        })
+    }
+    else if (t_ver.version === version)
+    {
+        console.log("Running the current version: %s", version);
+    }
+    else {
+        db.run('DELETE FROM version WHERE version=?',[t_ver.version],(err) => {
+            if (err) {
+                console.log("failed to remove version from table");
+            }
+            console.log("version removed from table");
+        })
+        db.run('INSERT INTO version (version) values(?)',[version], function(err) {
+            if (err) {
+                console.log("failed to set version");
+            }
+        })
+    }
+})
 
 // Configure Multer for file uploads
 const upload = multer({ dest: 'uploads/' });
@@ -54,6 +97,7 @@ const authenticateJWT = (req, res, next) => {
     if (token) {
         jwt.verify(token, secretKey, (err, user) => {
             if (err) {
+                
                 return res.sendStatus(403);
             }
             req.user = user;
@@ -68,8 +112,8 @@ const authenticateJWT = (req, res, next) => {
 app.post('/api/register', (req, res) => {
     const { username, password } = req.body;
     const hashedPassword = bcrypt.hashSync(password, 8);
-    const sql = 'INSERT INTO users (username, password) VALUES (?, ?)';
-    db.run(sql, [username, hashedPassword], function(err) {
+    const sql = 'INSERT INTO users (version, username, password) VALUES (?, ?, ?)';
+    db.run(sql, [version, username, hashedPassword], function(err) {
         if (err) {
             return res.status(400).json({ error: err.message });
         }
@@ -109,8 +153,8 @@ app.get('/api/parts', authenticateJWT, (req, res) => {
 // Add a new part for the authenticated user
 app.post('/api/parts', authenticateJWT, (req, res) => {
     const { name, value, footprint, description, quantity } = req.body;
-    const sql = 'INSERT INTO parts (user_id, name, value, footprint, description, quantity) VALUES (?, ?,?, ?, ?, ?)';
-    db.run(sql, [req.user.id, name, value, footprint, description, quantity], function(err) {
+    const sql = 'INSERT INTO parts (version, user_id, name, value, footprint, description, quantity) VALUES (?, ?, ?,?, ?, ?, ?)';
+    db.run(sql, [version, req.user.id, name, value, footprint, description, quantity], function(err) {
         if (err) {
             return res.status(400).json({ error: err.message });
         }
@@ -166,8 +210,8 @@ app.get('/api/projects', authenticateJWT, (req, res) => {
 app.post('/api/projects', authenticateJWT, (req, res) => {
     console.log(req.body);
     const { name, description, github } = req.body;
-    const sql = 'INSERT INTO projects (user_id, name, description, github) VALUES (?, ?, ?, ?)';
-    db.run(sql, [req.user.id, name,description, github], function(err) {
+    const sql = 'INSERT INTO projects (version, user_id, name, description, github) VALUES (?, ?, ?, ?, ?)';
+    db.run(sql, [version, req.user.id, name,description, github], function(err) {
         if (err) {
             return res.status(400).json({ error: err.message });
         }
@@ -237,7 +281,7 @@ app.post('/api/upload', authenticateJWT, upload.single('file'), (req, res) => {
             parts.forEach(part => {
                 const { name, value, footprint, description, quantity } = part;
                 const sql = 'INSERT INTO parts (user_id, name, value, footprint, description, quantity) VALUES (?, ?, ?, ?, ?, ?)';
-                const params = [req.user.id, name, value, footprint, description, quantity];
+                const params = [version, req.user.id, name, value, footprint, description, quantity];
                 db.run(sql, params, function(err) {
                     if (err) {
                         console.error(err.message);

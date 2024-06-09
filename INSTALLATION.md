@@ -16,7 +16,7 @@ From there, let's make sure the repo is in a place we are okay running at all ti
 
 We will add in the future instructions to run in a way that pipes server logs to a prod.logfile, for now we can start the server processes by doing 
 
-`nodemon . &` followed by `npx http-server . &` this will allow you to still use the terminal, though it will still print out logged events and restarts. Just press enter each time you need to do something in the console.
+`nodemon . &` followed by moving to the `frontend` directory and running `npx http-server . &` this will allow you to still use the terminal, though it will still print out logged events and restarts. Just press enter each time you need to do something in the console.
 
 To stop these proceses, you'll need to do `ps aux` and search for `http-server` and `nodemon` and kill those processes with `kill <process pid>`. If you have a lot of processes going, you can filter down the processes by doing `ps aux | grep -i "http-server"` and `ps aux | grep -i "nodemon"`.
 
