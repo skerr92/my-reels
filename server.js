@@ -280,7 +280,7 @@ app.post('/api/upload', authenticateJWT, upload.single('file'), (req, res) => {
         .on('end', () => {
             parts.forEach(part => {
                 const { name, value, footprint, description, quantity } = part;
-                const sql = 'INSERT INTO parts (user_id, name, value, footprint, description, quantity) VALUES (?, ?, ?, ?, ?, ?)';
+                const sql = 'INSERT INTO parts (version, user_id, name, value, footprint, description, quantity) VALUES (?,?, ?, ?, ?, ?, ?)';
                 const params = [version, req.user.id, name, value, footprint, description, quantity];
                 db.run(sql, params, function(err) {
                     if (err) {
