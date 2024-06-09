@@ -1,2 +1,8 @@
 .vscode/
 local-secrets.json
+*.db
+[Uu]ploads/*.*
+[Uu]ploads/*
+[Aa]ssets/*.*
+[Aa]ssets/*
+[Nn]ode_modules/*
