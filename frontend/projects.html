@@ -321,24 +321,24 @@
         </div>
     
         <div ng-controller="AuthController as authCtrl">
-            <div ng-if="authCtrl.isAuthenticated" ng-controller="ProjectsController as ctrl">
+            <div ng-if="authCtrl.isAuthenticated">
         <h1>Projects List</h1>
 
         <!-- File upload form -->
-        <form ng-submit="ctrl.uploadFile()">
+        <form ng-controller="ProjectsController as ctrl" ng-submit="ctrl.uploadFile()">
             <input type="file" ng-controller="AuthController as authCtrl" file-model="ctrl.myFile"/>
             <button type="submit" class="btn btn-sm btn-outline-primary">Upload CSV</button>
         </form>
-
-        <form ng-submit="ctrl.addProject()">
+        <h2>Add Project</h2>
+        <form ng-controller="ProjectsController as ctrl" ng-submit="ctrl.addProject()">
             <input type="text" ng-model="ctrl.newProject.name" placeholder="Project Name">
             <input type="text" ng-model="ctrl.newProject.description" placeholder="Description">
             <input type="text" ng-model="ctrl.newProject.github" placeholder="repository link">
             <button type="submit" class="btn btn-sm btn-outline-primary">Add Project</button>
         </form>
-
+        
         <h2>Projects</h2>
-        <div class="table-responsive small">
+        <div ng-controller="ProjectsController as ctrl" class="table-responsive small">
         <table class="table table-striped table-sm">
             <thead>
                 <tr>
@@ -360,6 +360,45 @@
           </tbody>
         </table>
         </div>
+        <div ng-controller="ProjectsController as ctrl" class="table-responsive small">
+          <h2>Add Part to Project</h2>
+        <form ng-controller="ProjectsController as ctrl" ng-submit="ctrl.addPartList()">
+          <select ng-model="ctrl.newPartList.project_name" placeholder="Project">
+            <option ng-repeat="project in ctrl.projects" value="{{project.name}}">{{project.name}}</option>
+          </select>
+          <select ng-controller="PartsController as pctrl" ng-model="ctrl.newPartList.part" placeholder="Part">
+            <option ng-repeat="part in pctrl.parts" value="{{part}}">{{part.id}} , {{part.name}}, {{part.value}}</option>
+          </select>
+          <input type="number" ng-model="ctrl.newPartList.quantity" placeholder="quantity">
+          <button type="submit" class="btn btn-sm btn-outline-primary">Add Parts List</button>
+        </form>
+          <table class="table table-striped table-sm">
+              <thead>
+                  <tr>
+                    <th scope="col">Parts List ID</th>
+                    <th scope="col">Associated Project Name</th>
+                    <th scope="col">Part Name</th>
+                    <th scope="col">Part Value</th>
+                    <th scope="col">Part Footprint</th>
+                    <th scope="col">Part Count</th>
+                    <th scope="col">Delete</th>
+                    <th scope="col">Edit</th>
+                  </tr>
+                </thead>
+            <tbody ng-repeat="partlist in ctrl.partlists">
+              <tr>
+                <th scope="col"><a href="">{{partlist.id}}</a></th> 
+                <th scope="col">{{partlist.project_name}}</th>  
+                <th scope="col">{{partlist.part_name}}</th>
+                <th scope="col">{{partlist.part_value}}</th>
+                <th scope="col">{{partlist.part_footprint}}</th>
+                <th scope="col">{{partlist.part_count}}</th>
+                <th scope="col"><button ng-click="ctrl.deletePart(partlist.id)" class="btn btn-sm btn-outline-secondary">Delete</button></th>
+                <th scope="col"><button ng-click="ctrl.editProject()" class="btn btn-sm btn-outline-secondary">Edit</button></th>
+              </tr>
+            </tbody>
+          </table>
+          </div>
         </div>
         </div>
 

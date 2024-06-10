@@ -17,7 +17,7 @@ const secretKey = 'your-secret-key'; // Change this to a secure secret key
 
 let version = "";
 
-version = fs.readFileSync('version.txt', 'utf8');
+version = fs.readFileSync('version.txt', 'utf8').trimEnd();
 console.log("Running MyReels Version: %s",version);
 app.use(bodyParser.json());
 app.use(cors());
@@ -58,6 +58,21 @@ db.serialize(() => {
         FOREIGN KEY(user_id) REFERENCES users(id)
         FOREIGN KEY(version) REFERENCES version(version)
     )`);
+    db.run(`CREATE TABLE IF NOT EXISTS partlist (
+        version TEXT,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        project_name TEXT,
+        part_id INTEGER,
+        part_name TEXT,
+        part_value TEXT,
+        part_footprint TEXT,
+        part_count INTEGER,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+        FOREIGN KEY(project_name) REFERENCES projects(name)
+        FOREIGN KEY(part_id) REFERENCES parts(id)
+        FOREIGN KEY(part_name) REFERENCES parts(name)
+    )`);
 });
 
 db.get('SELECT * FROM version',[],(err,t_ver) => {
@@ -84,6 +99,26 @@ db.get('SELECT * FROM version',[],(err,t_ver) => {
             if (err) {
                 console.log("failed to set version");
             }
+            db.run('UPDATE users SET version=?', [version], (err) => {
+                if (err) {
+                    console.log("failed to update version");
+                }
+            })
+            db.run('UPDATE parts SET version=?', [version], (err) => {
+                if (err) {
+                    console.log("failed to update version");
+                }
+            });
+            db.run('UPDATE projects SET version=?', [version], (err) => {
+                if (err) {
+                    console.log("failed to update version");
+                }
+            });
+            db.run('UPDATE partlist SET version=?', [version], (err) => {
+                if (err) {
+                    console.log("failed to update version");
+                }
+            })
         })
     }
 })
@@ -138,6 +173,10 @@ app.post('/api/login', (req, res) => {
         res.json({ token });
     });
 });
+
+app.get('/api/checkAuth', authenticateJWT, (req,res) => {
+    res.json(200);
+})
 
 // Get all parts for the authenticated user
 app.get('/api/parts', authenticateJWT, (req, res) => {
@@ -280,7 +319,7 @@ app.post('/api/upload', authenticateJWT, upload.single('file'), (req, res) => {
         .on('end', () => {
             parts.forEach(part => {
                 const { name, value, footprint, description, quantity } = part;
-                const sql = 'INSERT INTO parts (version, user_id, name, value, footprint, description, quantity) VALUES (?,?, ?, ?, ?, ?, ?)';
+                const sql = 'INSERT INTO partlist (version, user_id, name, value, footprint, description, quantity) VALUES (?,?, ?, ?, ?, ?, ?)';
                 const params = [version, req.user.id, name, value, footprint, description, quantity];
                 db.run(sql, params, function(err) {
                     if (err) {
@@ -290,6 +329,53 @@ app.post('/api/upload', authenticateJWT, upload.single('file'), (req, res) => {
             });
             res.json({ message: 'CSV file successfully processed' });
         });
+});
+
+// Get all parts for the authenticated user
+app.get('/api/partlists', authenticateJWT, (req, res) => {
+    const sql = 'SELECT * FROM partlist WHERE user_id = ?';
+    db.all(sql, [req.user.id], (err, rows) => {
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        res.json({ data: rows });
+    });
+});
+
+// Add a new part for the authenticated user
+app.post('/api/partlists', authenticateJWT, (req, res) => {
+    console.log("do we get called?");
+    const { project_name, part, quantity } = req.body;
+    jpart = JSON.parse(part);
+    console.log(jpart.id,jpart.name,jpart.value,jpart.footprint);
+    console.log(project_name);
+    part_id = jpart.id;
+    part_name = jpart.name;
+    part_value = jpart.footprint;
+    part_footprint = jpart.footprint;
+    const sql = 'INSERT INTO partlist (version, user_id, project_name, part_id, part_name, part_value, part_footprint, part_count) VALUES (?, ?, ?, ?, ?,?, ?, ?)';
+    db.run(sql, [version, req.user.id, project_name, part_id, part_name, part_value, part_footprint, quantity], function(err) {
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        res.json({
+            message: 'success',
+            data: { id: this.lastID, project_name, part_id, part_name, part_value, quantity }
+        });
+    });
+});
+
+
+// Delete a part for the authenticated user
+app.delete('/api/partlists/:id', authenticateJWT, (req, res) => {
+    const { id } = req.params;
+    const sql = 'DELETE FROM partlist WHERE id = ? AND user_id = ?';
+    db.run(sql, [id, req.user.id], function(err) {
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        res.json({ message: 'deleted', rowsAffected: this.changes });
+    });
 });
 
 app.listen(port, () => {

@@ -36,7 +36,7 @@ angular.module('pcbApp', [])
               .then(response => {
                   $window.localStorage.setItem('token', response.data.token);
                   authCtrl.isAuthenticated = true;
-                  $location.path('/index.html');
+                  $window.location.reload();
               }, error => {
                   console.error('Login error:', error.data.error);
               });
@@ -47,7 +47,7 @@ angular.module('pcbApp', [])
               .then(response => {
                   $window.localStorage.setItem('token', response.data.token);
                   authCtrl.isAuthenticated = true;
-                  $location.path('/index.html');
+                  $window.location.reload();
               }, error => {
                   console.error('Registration error:', error.data.error);
               });
@@ -58,6 +58,21 @@ angular.module('pcbApp', [])
           authCtrl.isAuthenticated = false;
           $window.location.reload();
       };
+
+      authCtrl.checkAuth = function() {
+        const token = $window.localStorage.getItem('token');
+        if (token != null)
+        {$http.get('http://localhost:3000/api/checkAuth', { headers: { 'Authorization': `Bearer ${token}` } })
+        .then(response => {
+        }, error => {
+            if (authCtrl.isAuthenticated)
+            {
+                authCtrl.logout();
+            }
+        });
+        }
+        }
+      authCtrl.checkAuth();
   }])
   .controller('PartsController', ['$http', '$window', 'fileUpload', function($http, $window, fileUpload) {
       const ctrl = this;
@@ -123,6 +138,8 @@ angular.module('pcbApp', [])
       const prjctrl = this;
       prjctrl.projects = [];
       prjctrl.newProject = {};
+      prjctrl.partlists = [];
+      prjctrl.newPartList = {};
       const token = $window.localStorage.getItem('token');
       
       prjctrl.getProjects = function() {
@@ -146,5 +163,38 @@ angular.module('pcbApp', [])
               });
       }
 
+      prjctrl.getPartLists = function() {
+        $http.get('http://localhost:3000/api/partlists', { headers: { 'Authorization': `Bearer ${token}` } })
+              .then(response => {
+                  prjctrl.partlists = response.data.data;
+              });
+      }
+
+      prjctrl.addPartList = function(partlist) {
+        console.log(prjctrl.newPartList);
+        $http.post('http://localhost:3000/api/partlists', prjctrl.newPartList, { headers: { 'Authorization': `Bearer ${token}` } })
+              .then(response => {
+                  prjctrl.partlists.push(response.data.data);
+                  prjctrl.newPartList = {};
+                  prjctrl.getPartLists()
+              });
+      }
+
+      prjctrl.addToPartList = function(parts) {
+        $http.post(`http://localhost:3000/api/partlists/${parts.id}`, parts, { headers: { 'Authorization': `Bearer ${token}` } })
+              .then(response => {
+                  prjctrl.partlists.push(response.data.data);
+                  prjctrl.newPartList = {};
+              });
+      }
+
+      prjctrl.deletePart = function(id) {
+        $http.delete(`http://localhost:3000/api/partlists/${id}`, { headers: { 'Authorization': `Bearer ${token}` } })
+              .then(response => {
+                  prjctrl.getPartLists();
+              });
+      }
+
       prjctrl.getProjects();
+      prjctrl.getPartLists();
   }]);
