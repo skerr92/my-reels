@@ -65,7 +65,7 @@ db.serialize(() => {
         project_name TEXT,
         part_id INTEGER,
         part_name TEXT,
-        part_value TEXT,
+        part_value TEXT UNIQUE,
         part_footprint TEXT,
         part_count INTEGER,
         FOREIGN KEY(user_id) REFERENCES users(id)
@@ -206,10 +206,14 @@ app.post('/api/parts', authenticateJWT, (req, res) => {
 
 // Update a part for the authenticated user
 app.put('/api/parts/:id', authenticateJWT, (req, res) => {
+    console.log("we're getting called");
     const { name, value, footprint, description, quantity } = req.body;
+    console.log(quantity);
     const { id } = req.params;
+    console.log(id)
     const sql = 'UPDATE parts SET name = ?, value = ?, footprint = ?,description = ?, quantity = ? WHERE id = ? AND user_id = ?';
     db.run(sql, [name, value, footprint, description, quantity, id, req.user.id], function(err) {
+        console.log(err)
         if (err) {
             console.log("we failed.");
             return res.status(400).json({ error: err.message });
@@ -351,7 +355,7 @@ app.post('/api/partlists', authenticateJWT, (req, res) => {
     console.log(project_name);
     part_id = jpart.id;
     part_name = jpart.name;
-    part_value = jpart.footprint;
+    part_value = jpart.value;
     part_footprint = jpart.footprint;
     const sql = 'INSERT INTO partlist (version, user_id, project_name, part_id, part_name, part_value, part_footprint, part_count) VALUES (?, ?, ?, ?, ?,?, ?, ?)';
     db.run(sql, [version, req.user.id, project_name, part_id, part_name, part_value, part_footprint, quantity], function(err) {

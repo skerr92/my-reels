@@ -98,11 +98,13 @@ angular.module('pcbApp', [])
       };
 
       ctrl.updatePart = function(part) {
+        console.log("we're getting called");
           if (part.isEditing) {
-            $http.put(`http://localhost:3000/api/parts/:${part.id}`, part, { headers: { 'Authorization': `Bearer ${token}`}})
+            $http.put(`http://localhost:3000/api/parts/${part.id}`, part, { headers: { 'Authorization': `Bearer ${token}`}})
             .then(response => {
                 part.isEditing = false;
-                
+                part.editablePart = null;
+                $window.location.reload();
             });
           } else {
             part.isEditing = true;
@@ -140,6 +142,9 @@ angular.module('pcbApp', [])
       prjctrl.newProject = {};
       prjctrl.partlists = [];
       prjctrl.newPartList = {};
+      prjctrl.buildBoards = {};
+      prjctrl.buildPartsList = [];
+      
       const token = $window.localStorage.getItem('token');
       
       prjctrl.getProjects = function() {

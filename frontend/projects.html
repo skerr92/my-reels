@@ -336,6 +336,14 @@
             <input type="text" ng-model="ctrl.newProject.github" placeholder="repository link">
             <button type="submit" class="btn btn-sm btn-outline-primary">Add Project</button>
         </form>
+        <h2>Build Some Boards</h2>
+        <form ng-controller="ProjectsController as ctrl" ng-submit="ctrl.buildBoards()">
+          <select ng-model="ctrl.projectBuild.name" placeholder="Project">
+            <option ng-repeat="project in ctrl.projects" value="{{project}}">{{project.name}}</option>
+          </select>
+          <input type="number" ng-model="ctrl.projectBuild.quantity" placeholder="Quantity">
+          <button type="submit" class="btn btn-sm btn-outline-primary">Build Boards</button>
+        </form>
         
         <h2>Projects</h2>
         <div ng-controller="ProjectsController as ctrl" class="table-responsive small">
@@ -367,7 +375,7 @@
             <option ng-repeat="project in ctrl.projects" value="{{project.name}}">{{project.name}}</option>
           </select>
           <select ng-controller="PartsController as pctrl" ng-model="ctrl.newPartList.part" placeholder="Part">
-            <option ng-repeat="part in pctrl.parts" value="{{part}}">{{part.id}} , {{part.name}}, {{part.value}}</option>
+            <option ng-repeat="part in pctrl.parts" value="{{part}}">{{part.id}} , {{part.name}}, {{part.value}}, {{part.footprint}}</option>
           </select>
           <input type="number" ng-model="ctrl.newPartList.quantity" placeholder="quantity">
           <button type="submit" class="btn btn-sm btn-outline-primary">Add Parts List</button>
