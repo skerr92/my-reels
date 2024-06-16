@@ -142,9 +142,8 @@ angular.module('pcbApp', [])
       prjctrl.newProject = {};
       prjctrl.partlists = [];
       prjctrl.newPartList = {};
-      prjctrl.buildBoards = {};
-      prjctrl.buildPartsList = [];
-      
+      prjctrl.projectBuild = {};
+
       const token = $window.localStorage.getItem('token');
       
       prjctrl.getProjects = function() {
@@ -198,6 +197,14 @@ angular.module('pcbApp', [])
               .then(response => {
                   prjctrl.getPartLists();
               });
+      }
+
+      prjctrl.buildBoards = function(build) {
+        $http.post('http://localhost:3000/api/project/build', prjctrl.projectBuild, { headers: { 'Authorization': `Bearer ${token}` }})
+             .then(response => {
+                prjctrl.projectBuild = {};
+                $window.location.reload();
+             })
       }
 
       prjctrl.getProjects();

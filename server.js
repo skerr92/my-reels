@@ -244,7 +244,6 @@ app.get('/api/projects', authenticateJWT, (req, res) => {
         if (err) {
             return res.status(400).json({ error: err.message });
         }
-        console.log(rows);
         res.json({ data: rows });
     });
 });
@@ -292,6 +291,41 @@ app.delete('/api/projects/:id', authenticateJWT, (req, res) => {
         }
         res.json({ message: 'deleted', rowsAffected: this.changes });
     });
+});
+
+app.post('/api/project/build', authenticateJWT, (req,res) => {
+    const { name, quantity } = req.body;
+    jproj = JSON.parse(name);
+    project_name = jproj.name;
+    console.log(project_name, quantity);
+    const set_sql = 'UPDATE parts SET quantity = (quantity - ?) WHERE id = ? and user_id = ?';
+    const get_count = 'SELECT quantity FROM parts WHERE id = ? and user_id = ?';
+    const get_sql = 'SELECT part_count,part_value,part_id FROM partlist WHERE project_name = ? AND user_id = ?';
+    part_count = [];
+    part_value = [];
+    part_id = [];
+    db.all(get_sql, [project_name, req.user.id], function(err,rows) {
+        if (err) {
+            return res.status(400).json({ error: err.message});
+        }
+        for (i = 0; i < rows.length; i++) {
+            console.log(rows[i].part_count);
+            part_count.push(rows[i].part_count)
+            part_id.push(rows[i].part_id)
+            console.log("part count: ", part_count[i]);
+            other_count = (parseInt(part_count[i]) * parseInt(quantity));
+            console.log("count being subtracted: ", other_count);
+            db.run(set_sql, [other_count, part_id[i], req.user.id], function (err) {
+                if (err) {
+                    console.log("couldn't update count...");
+                    return res.status(400).json({ error: err.message});
+                }
+                console.log("do where get to this point?");
+            });
+        }
+        res.json({ message: 'success'});
+    });
+
 });
 
 app.get('/projects/:id', authenticateJWT, (req, res) => {
