@@ -30,6 +30,7 @@ angular.module('pcbApp', [])
       authCtrl.isAuthenticated = !!$window.localStorage.getItem('token');
       authCtrl.credentials = {};
       authCtrl.newUser = {};
+      authCtrl.pwrst = {};
 
       authCtrl.login = function() {
           $http.post('http://localhost:3000/api/login', authCtrl.credentials)
@@ -72,6 +73,14 @@ angular.module('pcbApp', [])
         });
         }
         }
+      authCtrl.pw_reset = function() {
+        $http.post('http://localhost:3000/api/pwrst', authCtrl.pwrst)
+              .then(response => {
+                  $window.location.href = 'http://localhost:8080/login.html';
+              }, error => {
+                  console.error('Reset error:', error.data.error);
+              });
+      };
       authCtrl.checkAuth();
   }])
   .controller('PartsController', ['$http', '$window', 'fileUpload', function($http, $window, fileUpload) {
