@@ -5,10 +5,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
-    <meta name="generator" content="Hugo 0.122.0">
-    <title>MyReels Signin</title>
+
+    <title>MyReels Registration</title>
     <script src="app.js"></script>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
@@ -114,6 +112,7 @@
     
     <!-- Custom styles for this template -->
     <link href="css/sign-in.css" rel="stylesheet">
+    
   </head>
   <body class="d-flex align-items-center py-4 bg-body-tertiary">
 
@@ -170,14 +169,14 @@
 
  <main class="form-signin w-100 m-auto">   
     <div ng-controller="AuthController as authCtrl" class="nav flex-column mb-auto">
-            <h1>Login</h1>
+            <h1>Reset password</h1>
             <div ng-if="!authCtrl.isAuthenticated" >
-            <form ng-submit="authCtrl.login()" onsuccess="/index.html">
-                <input type="text" ng-model="authCtrl.credentials.username" placeholder="Username" required>
-                <input type="password" ng-model="authCtrl.credentials.password" placeholder="Password" required>
-                <button type="submit" class="btn btn-sm btn-outline-secondary">Login</button>
-            </form>
-            <a class="btn btn-sm btn-outline-warning" href="/pwrst.html">Reset Password</a>
+                <form ng-submit="authCtrl.pw_reset()">
+                    <input type="text" ng-model="authCtrl.pwrst.username" placeholder="Username" required>
+                    <input type="password" ng-model="authCtrl.pwrst.new_password" placeholder="New Password" required>
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">Reset Password</button>
+                </form>
+            <a class="btn btn-sm btn-outline-primary" href="/index.html">Return Home</a>
         </div>
         </div>
 </main>
