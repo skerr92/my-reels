@@ -340,7 +340,7 @@
         <h1>Parts Inventory List</h1>
 
         <!-- File upload form -->
-        <form ng-submit="ctrl.uploadFile()">
+        <form ng-submit="ctrl.uploadFile()" style="padding-top: 20px; padding-bottom: 20px;">
             <input type="file" ng-controller="AuthController as authCtrl" file-model="ctrl.myFile"/>
             <button type="submit" class="btn btn-sm btn-outline-primary">Upload CSV</button>
         </form>

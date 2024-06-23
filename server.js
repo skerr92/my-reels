@@ -178,6 +178,18 @@ app.get('/api/checkAuth', authenticateJWT, (req,res) => {
     res.json(200);
 })
 
+app.post('/api/pwrst', (req, res) => {
+    const { username, new_password } = req.body;
+    const hashedPassword = bcrypt.hashSync(new_password, 8);
+    const sql = 'UPDATE users SET password = ? where username = ?';
+    db.run(sql, [hashedPassword, username], function(err) {
+        if (err) {
+            return res.status(400).json({ error: 'User not found'});
+        }
+        res.status(200).json({message:"Success!"});
+    });
+});
+
 // Get all parts for the authenticated user
 app.get('/api/parts', authenticateJWT, (req, res) => {
     const sql = 'SELECT * FROM parts WHERE user_id = ?';
