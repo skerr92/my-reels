@@ -103,6 +103,7 @@ angular.module('pcbApp', [])
               .then(response => {
                   ctrl.parts.push(response.data.data);
                   ctrl.newPart = {};
+                  $window.location.reload();
               });
       };
 
@@ -140,6 +141,7 @@ angular.module('pcbApp', [])
               .then(response => {
                   console.log(response.data.message);
                   ctrl.getParts();
+                  $window.location.reload();
               });
       };
 

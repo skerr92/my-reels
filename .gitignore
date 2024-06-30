@@ -6,3 +6,4 @@ local-secrets.json
 [Aa]ssets/*.*
 [Aa]ssets/*
 [Nn]ode_modules/*
+[Ll]og.file
