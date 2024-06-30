@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const CryptoJS = require('crypto-js');
 
-const txtfs = require('node:fs');
+const txtfs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -204,15 +204,43 @@ app.get('/api/parts', authenticateJWT, (req, res) => {
 // Add a new part for the authenticated user
 app.post('/api/parts', authenticateJWT, (req, res) => {
     const { name, value, footprint, description, quantity } = req.body;
+    const get_sql = 'SELECT * FROM parts WHERE name = ? AND footprint = ? AND value = ? AND user_id = ?';
     const sql = 'INSERT INTO parts (version, user_id, name, value, footprint, description, quantity) VALUES (?, ?, ?,?, ?, ?, ?)';
-    db.run(sql, [version, req.user.id, name, value, footprint, description, quantity], function(err) {
+    const updatesql = 'UPDATE parts SET quantity = ? WHERE user_id = ? AND id = ?';
+    db.all(get_sql, [name, footprint, value, req.user.id], function(err,rows) {
         if (err) {
-            return res.status(400).json({ error: err.message });
+            console.log("couldn't add part...");
+            return res.status(400).json({ error: err.message});
         }
-        res.json({
-            message: 'success',
-            data: { id: this.lastID, name, value, footprint, description: description, quantity }
-        });
+        console.log(rows[0]);
+        if (rows[0] == null)
+        {
+            db.run(sql, [version, req.user.id, name, value, footprint, description, quantity], function(err) {
+                if (err) {
+                    return res.status(400).json({ error: err.message });
+                }
+                res.json({
+                    message: 'success',
+                    data: { id: this.lastID, name, value, footprint, description: description, quantity }
+                });
+            });
+        }
+        else
+        {    
+            console.log(rows[0]);
+            part_count = rows[0].quantity
+            part_id = rows[0].id
+            new_count = (parseInt(part_count) + parseInt(quantity));
+            db.run(updatesql, [new_count, req.user.id, part_id], function (err) {
+                if (err) {
+                    console.log("couldn't update count...");
+                    return res.status(400).json({ error: err.message});
+                }
+                res.json({ message: 'success'});
+            });
+            
+        }
+        
     });
 });
 
@@ -369,12 +397,43 @@ app.post('/api/upload', authenticateJWT, upload.single('file'), (req, res) => {
         .on('end', () => {
             parts.forEach(part => {
                 const { name, value, footprint, description, quantity } = part;
-                const sql = 'INSERT INTO partlist (version, user_id, name, value, footprint, description, quantity) VALUES (?,?, ?, ?, ?, ?, ?)';
-                const params = [version, req.user.id, name, value, footprint, description, quantity];
-                db.run(sql, params, function(err) {
+                const get_sql = 'SELECT * FROM parts WHERE name = ? AND footprint = ? AND value = ? AND user_id = ?';
+                const sql = 'INSERT INTO parts (version, user_id, name, value, footprint, description, quantity) VALUES (?, ?, ?,?, ?, ?, ?)';
+                const updatesql = 'UPDATE parts SET quantity = ? WHERE user_id = ? AND id = ?';
+                db.all(get_sql, [name, footprint, value, req.user.id], function(err,rows) {
                     if (err) {
-                        console.error(err.message);
+                        console.log("couldn't add part...");
+                        return res.status(400).json({ error: err.message});
                     }
+                    console.log(rows[0]);
+                    if (rows[0] == null)
+                    {
+                        db.run(sql, [version, req.user.id, name, value, footprint, description, quantity], function(err) {
+                            if (err) {
+                                return res.status(400).json({ error: err.message });
+                            }
+                            
+                        });
+                    }
+                    else
+                    {    
+                        console.log(rows[0]);
+                        part_count = rows[0].quantity
+                        part_id = rows[0].id
+                        console.log("part count: ", part_count);
+                        new_count = (parseInt(part_count) + parseInt(quantity));
+                        console.log("count being added: ", new_count);
+                        db.run(updatesql, [new_count, req.user.id, part_id], function (err) {
+                            if (err) {
+                                console.log("couldn't update count...");
+                                return res.status(400).json({ error: err.message});
+                            }
+                            console.log("do where get to this point?");
+                            
+                        });
+                        
+                    }
+                    
                 });
             });
             res.json({ message: 'CSV file successfully processed' });
